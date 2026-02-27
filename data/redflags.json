@@ -1,0 +1,23 @@
+{
+  "password": {
+    "pattern": "(password|pwd)\\s*[:=]\\s*\\S+",
+    "replaceWith": "password: ********",
+    "enabled": true
+  },
+  "email": {
+    "pattern": "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",
+    "replaceWith": "********",
+    "enabled": true
+  },
+  "telefono": {
+    "pattern": "\\+?\\d[\\d\\s().-]{7,}\\d",
+    "replaceWith": "********",
+    "enabled": true
+  },
+  "jdbc_connection": {
+    "pattern": "jdbc:mysql://\\S+",
+    "replaceWith": "[jdbc-redacted]",
+    "enabled": true
+  }
+}
+

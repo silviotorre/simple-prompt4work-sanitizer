@@ -1,0 +1,6 @@
+{
+  "\\bprogetto\\s+\\S+": "progetto [omesso]",
+  "\\bcliente\\s*:\\s*\\S+": "cliente: [omesso]",
+  "\\bresponsabile\\s*:\\s*\\S+": "responsabile: [omesso]"
+}
+

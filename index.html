@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Prompt4Work Sanitizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-a"></div>
+    <div class="bg-shape bg-shape-b"></div>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Simple Prompt4Work Sanitizer</p>
+        <h1>Sanitizza prompt in tempo reale</h1>
+        <p class="subtitle">
+          Rimuovi contenuti indesiderati con regole JSON e regex, ottieni output
+          markdown pronto all'uso.
+        </p>
+      </header>
+
+      <section class="card controls" aria-label="Controlli sanitizzazione">
+        <h2>Funzioni</h2>
+        <label><input id="toggle-dictionary" type="checkbox" checked /> Dizionario (default + custom)</label>
+        <label><input id="toggle-redflags" type="checkbox" checked /> Red flags (regex)</label>
+        <label><input id="toggle-markdown" type="checkbox" checked /> Trasformazione markdown</label>
+        <p id="status-text" class="status">Caricamento configurazioni...</p>
+      </section>
+
+      <section class="grid">
+        <article class="card panel">
+          <h2>Input Prompt</h2>
+          <textarea
+            id="input-text"
+            placeholder="Incolla qui il prompt da sanitizzare..."
+            spellcheck="false"
+          ></textarea>
+        </article>
+
+        <article class="card panel">
+          <h2>Output Markdown</h2>
+          <textarea id="output-text" readonly spellcheck="false"></textarea>
+        </article>
+      </section>
+
+      <section class="card panel">
+        <h2>Preview</h2>
+        <div id="preview" class="preview"></div>
+      </section>
+
+      <section class="card panel">
+        <h2>Diagnostica</h2>
+        <ul id="diagnostics" class="diagnostics"></ul>
+      </section>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
+

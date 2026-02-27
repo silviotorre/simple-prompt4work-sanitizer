@@ -1,0 +1,7 @@
+{
+  "\\bidiota\\b": "persona",
+  "\\bstupido\\b": "non appropriato",
+  "\\bvergognoso\\b": "da rivedere",
+  "\\bconfidenziale\\b.*$": ""
+}
+
