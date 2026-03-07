@@ -1,7 +1,69 @@
 {
-  "\\bidiota\\b": "persona",
-  "\\bstupido\\b": "non appropriato",
-  "\\bvergognoso\\b": "da rivedere",
-  "\\bconfidenziale\\b.*$": ""
+  "meta": {
+    "label": "Default replacement pack",
+    "version": 1,
+    "description": "Regole base per ripulire tono e riferimenti sensibili ricorrenti."
+  },
+  "rules": [
+    {
+      "id": "tone-idiota",
+      "type": "replacement",
+      "pattern": "\\bidiota\\b",
+      "replaceWith": "persona",
+      "category": "tone",
+      "severity": "medium",
+      "description": "Riduce linguaggio offensivo diretto.",
+      "enabled": true
+    },
+    {
+      "id": "tone-stupido",
+      "type": "replacement",
+      "pattern": "\\bstupido\\b",
+      "replaceWith": "non appropriato",
+      "category": "tone",
+      "severity": "medium",
+      "description": "Neutralizza formulazioni denigratorie.",
+      "enabled": true
+    },
+    {
+      "id": "tone-vergognoso",
+      "type": "replacement",
+      "pattern": "\\bvergognoso\\b",
+      "replaceWith": "da rivedere",
+      "category": "tone",
+      "severity": "low",
+      "description": "Attenua giudizi assoluti.",
+      "enabled": true
+    },
+    {
+      "id": "privacy-confidenziale",
+      "type": "replacement",
+      "pattern": "\\bconfidenziale\\b.*$",
+      "replaceWith": "",
+      "category": "privacy",
+      "severity": "high",
+      "description": "Rimuove note finali con etichetta confidenziale.",
+      "enabled": true
+    },
+    {
+      "id": "project-codename",
+      "type": "replacement",
+      "pattern": "\\bcodename\\s*[:=]\\s*\\S+",
+      "replaceWith": "codename: [omesso]",
+      "category": "project",
+      "severity": "medium",
+      "description": "Maschera codename interni di progetto.",
+      "enabled": true
+    },
+    {
+      "id": "workitem-ticket",
+      "type": "replacement",
+      "pattern": "\\b(ticket|issue)\\s*#?\\s*[A-Z]+-?\\d+\\b",
+      "replaceWith": "ticket [omesso]",
+      "category": "tracking",
+      "severity": "medium",
+      "description": "Oscura riferimenti espliciti a ticket o issue.",
+      "enabled": true
+    }
+  ]
 }
-

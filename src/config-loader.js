@@ -2,6 +2,14 @@ function isPlainObject(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isLegacyReplacementMap(rawConfig) {
+  return isPlainObject(rawConfig) && !Array.isArray(rawConfig.rules);
+}
+
+function isExtendedRuleSet(rawConfig) {
+  return isPlainObject(rawConfig) && Array.isArray(rawConfig.rules);
+}
+
 async function fetchJson(path, label, errors) {
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -19,17 +27,44 @@ async function fetchJson(path, label, errors) {
 }
 
 function validateReplacementConfig(rawConfig, label, errors) {
-  if (!isPlainObject(rawConfig)) {
+  if (isLegacyReplacementMap(rawConfig)) {
+    const validConfig = {};
+    for (const [pattern, replacement] of Object.entries(rawConfig)) {
+      if (typeof replacement !== "string") {
+        errors.push(`[${label}] Valore ignorato per "${pattern}": attesa stringa.`);
+        continue;
+      }
+      validConfig[pattern] = replacement;
+    }
+
+    return validConfig;
+  }
+
+  if (!isExtendedRuleSet(rawConfig)) {
     errors.push(`[${label}] Config non valida: atteso oggetto JSON.`);
     return {};
   }
 
   const validConfig = {};
-  for (const [pattern, replacement] of Object.entries(rawConfig)) {
-    if (typeof replacement !== "string") {
-      errors.push(`[${label}] Valore ignorato per "${pattern}": attesa stringa.`);
+  for (const rule of rawConfig.rules) {
+    if (!isPlainObject(rule)) {
+      errors.push(`[${label}] Regola ignorata: atteso oggetto.`);
       continue;
     }
+
+    const pattern = typeof rule.pattern === "string" ? rule.pattern : "";
+    const replacement = typeof rule.replaceWith === "string" ? rule.replaceWith : "";
+    const enabled = typeof rule.enabled === "boolean" ? rule.enabled : true;
+
+    if (!pattern) {
+      errors.push(`[${label}] Regola ignorata: "pattern" mancante o non stringa.`);
+      continue;
+    }
+
+    if (!enabled) {
+      continue;
+    }
+
     validConfig[pattern] = replacement;
   }
 
@@ -37,27 +72,58 @@ function validateReplacementConfig(rawConfig, label, errors) {
 }
 
 function validateRedFlagsConfig(rawConfig, label, errors) {
-  if (!isPlainObject(rawConfig)) {
+  if (isLegacyReplacementMap(rawConfig)) {
+    const validConfig = {};
+    for (const [ruleName, ruleConfig] of Object.entries(rawConfig)) {
+      if (!isPlainObject(ruleConfig)) {
+        errors.push(`[${label}] Regola "${ruleName}" ignorata: atteso oggetto.`);
+        continue;
+      }
+
+      if (typeof ruleConfig.pattern !== "string") {
+        errors.push(`[${label}] Regola "${ruleName}" ignorata: "pattern" mancante o non stringa.`);
+        continue;
+      }
+
+      const replaceWith = typeof ruleConfig.replaceWith === "string" ? ruleConfig.replaceWith : "";
+      const enabled = typeof ruleConfig.enabled === "boolean" ? ruleConfig.enabled : true;
+      validConfig[ruleName] = {
+        pattern: ruleConfig.pattern,
+        replaceWith,
+        enabled
+      };
+    }
+
+    return validConfig;
+  }
+
+  if (!isExtendedRuleSet(rawConfig)) {
     errors.push(`[${label}] Config non valida: atteso oggetto JSON.`);
     return {};
   }
 
   const validConfig = {};
-  for (const [ruleName, ruleConfig] of Object.entries(rawConfig)) {
-    if (!isPlainObject(ruleConfig)) {
-      errors.push(`[${label}] Regola "${ruleName}" ignorata: atteso oggetto.`);
+  for (const rule of rawConfig.rules) {
+    if (!isPlainObject(rule)) {
+      errors.push(`[${label}] Regola ignorata: atteso oggetto.`);
       continue;
     }
 
-    if (typeof ruleConfig.pattern !== "string") {
+    const ruleName = typeof rule.id === "string" && rule.id.trim() ? rule.id.trim() : "";
+    if (!ruleName) {
+      errors.push(`[${label}] Regola ignorata: "id" mancante o non stringa.`);
+      continue;
+    }
+
+    if (typeof rule.pattern !== "string") {
       errors.push(`[${label}] Regola "${ruleName}" ignorata: "pattern" mancante o non stringa.`);
       continue;
     }
 
-    const replaceWith = typeof ruleConfig.replaceWith === "string" ? ruleConfig.replaceWith : "";
-    const enabled = typeof ruleConfig.enabled === "boolean" ? ruleConfig.enabled : true;
+    const replaceWith = typeof rule.replaceWith === "string" ? rule.replaceWith : "";
+    const enabled = typeof rule.enabled === "boolean" ? rule.enabled : true;
     validConfig[ruleName] = {
-      pattern: ruleConfig.pattern,
+      pattern: rule.pattern,
       replaceWith,
       enabled
     };
@@ -81,4 +147,3 @@ export async function loadAppConfigs() {
     errors
   };
 }
-

@@ -11,6 +11,44 @@ function firstNonEmptyLineIndex(lines) {
   return -1;
 }
 
+function splitIntoBlocks(lines) {
+  const blocks = [];
+  let currentLines = [];
+  let blankLinesBefore = 0;
+  let currentBlankLinesBefore = 0;
+
+  for (const line of lines) {
+    if (line.trim() === "") {
+      if (currentLines.length) {
+        blocks.push({
+          lines: currentLines,
+          blankLinesBefore: currentBlankLinesBefore
+        });
+        currentLines = [];
+      }
+
+      blankLinesBefore += 1;
+      continue;
+    }
+
+    if (!currentLines.length) {
+      currentBlankLinesBefore = blankLinesBefore;
+      blankLinesBefore = 0;
+    }
+
+    currentLines.push(line);
+  }
+
+  if (currentLines.length) {
+    blocks.push({
+      lines: currentLines,
+      blankLinesBefore: currentBlankLinesBefore
+    });
+  }
+
+  return blocks;
+}
+
 export function transformToMarkdown(input) {
   const safeInput = typeof input === "string" ? input : "";
   const normalized = normalizeNewlines(safeInput);
@@ -26,41 +64,27 @@ export function transformToMarkdown(input) {
     }
 
     const title = lines[titleIndex].trim();
-    const remaining = lines.slice(titleIndex + 1).join("\n");
     const output = [`# ${title}`];
 
-    if (!remaining.trim()) {
+    const blocks = splitIntoBlocks(lines.slice(titleIndex + 1));
+    if (!blocks.length) {
       return output.join("\n");
     }
 
-    const fragments = remaining.split(/(\n{2,})/);
-    let previousSeparator = "";
-
-    for (let i = 0; i < fragments.length; i += 1) {
-      const part = fragments[i];
-      if (i % 2 === 1) {
-        previousSeparator = part;
-        continue;
-      }
-
-      if (!part || !part.trim()) {
-        continue;
-      }
-
-      const blockText = part.replace(/^\n+/, "").replace(/\n+$/, "");
+    for (const block of blocks) {
+      const blockText = block.lines.join("\n").trim();
       if (!blockText) {
         continue;
       }
 
-      if (!previousSeparator) {
+      if (block.blankLinesBefore === 0) {
         output.push(blockText);
         continue;
       }
 
-      const headingLevel = previousSeparator.length >= 3 ? "###" : "##";
-      const blockLines = blockText.split("\n");
-      const headingTitle = blockLines[0].trim();
-      const blockBody = blockLines.slice(1).join("\n").trim();
+      const headingLevel = block.blankLinesBefore >= 2 ? "###" : "##";
+      const headingTitle = block.lines[0].trim();
+      const blockBody = block.lines.slice(1).join("\n").trim();
 
       output.push(`${headingLevel} ${headingTitle}`);
       if (blockBody) {
@@ -73,4 +97,3 @@ export function transformToMarkdown(input) {
     return normalized;
   }
 }
-
