@@ -1,23 +1,69 @@
 {
-  "password": {
-    "pattern": "(password|pwd)\\s*[:=]\\s*\\S+",
-    "replaceWith": "password: ********",
-    "enabled": true
+  "meta": {
+    "label": "Default red flags",
+    "version": 1,
+    "description": "Pattern sensibili ad alta priorita da oscurare con regex."
   },
-  "email": {
-    "pattern": "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",
-    "replaceWith": "********",
-    "enabled": true
-  },
-  "telefono": {
-    "pattern": "\\+?\\d[\\d\\s().-]{7,}\\d",
-    "replaceWith": "********",
-    "enabled": true
-  },
-  "jdbc_connection": {
-    "pattern": "jdbc:mysql://\\S+",
-    "replaceWith": "[jdbc-redacted]",
-    "enabled": true
-  }
+  "rules": [
+    {
+      "id": "password",
+      "type": "redflag",
+      "pattern": "(password|pwd)\\s*[:=]\\s*\\S+",
+      "replaceWith": "password: ********",
+      "category": "credentials",
+      "severity": "critical",
+      "description": "Rimuove password o shorthand pwd espliciti.",
+      "enabled": true
+    },
+    {
+      "id": "email",
+      "type": "redflag",
+      "pattern": "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",
+      "replaceWith": "********",
+      "category": "personal-data",
+      "severity": "high",
+      "description": "Oscura indirizzi email.",
+      "enabled": true
+    },
+    {
+      "id": "telefono",
+      "type": "redflag",
+      "pattern": "\\+?\\d[\\d\\s().-]{7,}\\d",
+      "replaceWith": "********",
+      "category": "personal-data",
+      "severity": "high",
+      "description": "Oscura numeri telefonici in formati comuni.",
+      "enabled": true
+    },
+    {
+      "id": "jdbc_connection",
+      "type": "redflag",
+      "pattern": "jdbc:mysql://\\S+",
+      "replaceWith": "[jdbc-redacted]",
+      "category": "infrastructure",
+      "severity": "critical",
+      "description": "Rimuove connection string JDBC.",
+      "enabled": true
+    },
+    {
+      "id": "bearer-token",
+      "type": "redflag",
+      "pattern": "Bearer\\s+[A-Z0-9._-]+",
+      "replaceWith": "Bearer ********",
+      "category": "credentials",
+      "severity": "critical",
+      "description": "Oscura bearer token in header o log.",
+      "enabled": true
+    },
+    {
+      "id": "windows-path",
+      "type": "redflag",
+      "pattern": "[A-Z]:\\\\(?:[^\\\\\\r\\n]+\\\\)*[^\\\\\\r\\n]*",
+      "replaceWith": "[path-redacted]",
+      "category": "local-data",
+      "severity": "medium",
+      "description": "Maschera path locali Windows.",
+      "enabled": true
+    }
+  ]
 }
-

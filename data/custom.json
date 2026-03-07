@@ -1,6 +1,69 @@
 {
-  "\\bprogetto\\s+\\S+": "progetto [omesso]",
-  "\\bcliente\\s*:\\s*\\S+": "cliente: [omesso]",
-  "\\bresponsabile\\s*:\\s*\\S+": "responsabile: [omesso]"
+  "meta": {
+    "label": "Custom workspace pack",
+    "version": 1,
+    "description": "Regole specifiche per contesti di lavoro, ruoli e riferimenti operativi."
+  },
+  "rules": [
+    {
+      "id": "project-name",
+      "type": "replacement",
+      "pattern": "\\bprogetto\\s+\\S+",
+      "replaceWith": "progetto [omesso]",
+      "category": "project",
+      "severity": "high",
+      "description": "Maschera il nome del progetto quando espresso in forma libera.",
+      "enabled": true
+    },
+    {
+      "id": "client-field",
+      "type": "replacement",
+      "pattern": "\\bcliente\\s*:\\s*\\S+",
+      "replaceWith": "cliente: [omesso]",
+      "category": "privacy",
+      "severity": "high",
+      "description": "Oscura il nome cliente in campi etichettati.",
+      "enabled": true
+    },
+    {
+      "id": "owner-field",
+      "type": "replacement",
+      "pattern": "\\bresponsabile\\s*:\\s*\\S+",
+      "replaceWith": "responsabile: [omesso]",
+      "category": "privacy",
+      "severity": "medium",
+      "description": "Rimuove il nome del responsabile diretto.",
+      "enabled": true
+    },
+    {
+      "id": "stakeholder-field",
+      "type": "replacement",
+      "pattern": "\\bstakeholder\\s*:\\s*\\S+",
+      "replaceWith": "stakeholder: [omesso]",
+      "category": "privacy",
+      "severity": "medium",
+      "description": "Maschera nominativi stakeholder espliciti.",
+      "enabled": true
+    },
+    {
+      "id": "repository-field",
+      "type": "replacement",
+      "pattern": "\\brepo(?:sitory)?\\s*:\\s*\\S+",
+      "replaceWith": "repo: [omesso]",
+      "category": "project",
+      "severity": "medium",
+      "description": "Oscura il repository o path remoto del progetto.",
+      "enabled": true
+    },
+    {
+      "id": "environment-field",
+      "type": "replacement",
+      "pattern": "\\b(?:server|ambiente)\\s*:\\s*\\S+",
+      "replaceWith": "ambiente: [omesso]",
+      "category": "infrastructure",
+      "severity": "medium",
+      "description": "Maschera nomi host o ambienti interni.",
+      "enabled": true
+    }
+  ]
 }
-
