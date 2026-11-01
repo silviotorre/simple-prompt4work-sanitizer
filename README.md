@@ -1,5 +1,7 @@
 # Prompt4Work Sanitizer
 
+[![Test and Deploy](https://github.com/silviotorre/simple-prompt4work-sanitizer/actions/workflows/deploy.yml/badge.svg)](https://github.com/silviotorre/simple-prompt4work-sanitizer/actions/workflows/deploy.yml)
+
 A lightweight browser-based tool for **sanitizing work prompts before they are shared with external systems**.
 
 The application applies configurable replacement rules and red-flag detection locally in the browser, then produces sanitized Markdown together with diagnostics showing which controls were applied.
