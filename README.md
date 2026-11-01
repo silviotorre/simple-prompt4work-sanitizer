@@ -1,76 +1,73 @@
-# simple-prompt4work-sanitizer
+# Prompt4Work Sanitizer
 
-Single-page web app per sanitizzare prompt di lavoro in tempo reale, con regole configurabili via JSON (stringhe e regex), output markdown e diagnostica delle regole applicate.
+A lightweight browser-based tool for **sanitizing work prompts before they are shared with external systems**.
 
-## Caratteristiche MVP
+The application applies configurable replacement rules and red-flag detection locally in the browser, then produces sanitized Markdown together with diagnostics showing which controls were applied.
 
-- Sanitizzazione live (senza reload pagina)
-- Configurazione via JSON:
-  - `data/default.json`
-  - `data/custom.json`
-  - `data/redflags.json`
-- Priorita regole: `custom` sovrascrive `default`
-- Supporto red flags con regex (email, password, telefono, connection string, ecc.)
-- Output markdown + preview HTML sicura
-- Toggle runtime:
-  - dizionario (`default + custom`)
-  - red flags
-  - trasformazione markdown
-- Diagnostica applicata in UI (regole usate + warning/errori)
-- Test unitari del core con Vitest
-- Workflow GitHub Actions per test + deploy su GitHub Pages
+## Why it exists
 
-## Architettura
+Work prompts can accidentally contain internal names, credentials, connection strings, email addresses, phone numbers, or other context that should not leave the working environment.
 
-- `index.html`: UI principale
-- `styles.css`: tema e layout responsive
-- `src/main.js`: wiring UI, stato, debounce, render live
-- `src/config-loader.js`: caricamento/validazione JSON
-- `src/sanitizer.js`: pipeline core sanitizzazione
-- `src/markdown.js`: conversione testo -> markdown
-- `data/*.json`: configurazioni sanitizzazione
-- `tests/*.test.js`: unit test core
-- `.github/workflows/deploy.yml`: CI/CD Pages
+This project provides a small, inspectable preprocessing step for that problem. It is a **sanitization aid, not a data-loss-prevention product**: users remain responsible for reviewing the output before sharing it.
 
-## Setup locale
+## Capabilities
 
-1. Clona il repository.
-2. Installa dipendenze:
-   ```bash
-   npm install
-   ```
-3. Esegui i test:
-   ```bash
-   npm test
-   ```
-4. Avvia un server statico locale (consigliato, per consentire il fetch dei JSON):
-   ```bash
-   npx serve .
-   ```
-5. Apri l'URL locale mostrato dal server.
+- Live sanitization without page reloads.
+- JSON-based configuration for default, custom, and red-flag rules.
+- Literal and regular-expression matching.
+- Custom rules override default replacements.
+- Red-flag detection for patterns such as email addresses, passwords, phone numbers, and connection strings.
+- Markdown output with safe HTML preview.
+- Runtime toggles for dictionary rules, red flags, and Markdown transformation.
+- Diagnostics for applied rules, warnings, and errors.
+- Unit tests for the sanitization core with Vitest.
+- GitHub Actions workflow for test and GitHub Pages deployment.
 
-Nota: aprire `index.html` direttamente da `file://` puo bloccare il caricamento dei JSON in alcuni browser.
+## Architecture
 
-## Formato configurazioni JSON
+```text
+Input prompt
+  -> configuration loader
+  -> dictionary replacements
+  -> red-flag rules
+  -> Markdown transformation
+  -> sanitized output + diagnostics
+```
 
-### 1) Replacement config (`default.json` / `custom.json`)
+Main components:
+
+- `index.html` — application UI.
+- `styles.css` — responsive layout and presentation.
+- `src/main.js` — UI wiring, state, debounce, and live rendering.
+- `src/config-loader.js` — configuration loading and validation.
+- `src/sanitizer.js` — sanitization pipeline.
+- `src/markdown.js` — Markdown transformation.
+- `data/*.json` — sanitization configuration.
+- `tests/*.test.js` — core unit tests.
+- `.github/workflows/deploy.yml` — CI and GitHub Pages deployment.
+
+## Configuration
+
+### Replacement rules
+
+`data/default.json` and `data/custom.json` use a simple key/value mapping:
 
 ```json
 {
-  "pattern_o_testo": "sostituzione",
-  "parola_da_rimuovere": ""
+  "pattern_or_text": "replacement",
+  "text_to_remove": ""
 }
 ```
 
-- Se la chiave e una regex valida, viene usata come regex (`gi`).
-- Se non e una regex valida, viene trattata come testo letterale case-insensitive.
-- Valore `""` => rimozione.
+If a key is a valid regular expression it is evaluated as a case-insensitive global regex. Otherwise it is treated as case-insensitive literal text. An empty replacement removes the match.
 
-### 2) Red flags config (`redflags.json`)
+### Red-flag rules
+
+`data/redflags.json` uses named rule objects:
 
 ```json
 {
-  "nome_regola": {
+  "rule_name": {
     "pattern": "regex",
     "replaceWith": "********",
     "enabled": true
@@ -78,47 +75,41 @@ Nota: aprire `index.html` direttamente da `file://` puo bloccare il caricamento 
 }
 ```
 
-- `replaceWith` opzionale (default: `""`)
-- `enabled` opzionale (default: `true`)
+`replaceWith` and `enabled` are optional.
 
-## Regole markdown (MVP)
+## Core API
 
-- Prima riga non vuota -> `# Titolo`
-- Blocco separato da doppio newline -> `##`
-- Blocco separato da triplo newline -> `###`
-- Singolo newline interno blocco -> testo normale
-- Fallback sicuro: in caso di errore parser, nessuna perdita di contenuto
+```text
+sanitizePrompt(input, options, configs)
+  -> { outputMarkdown, diagnostics }
+```
 
-## API core
+The diagnostic result exposes applied rules and configuration/parser errors so the sanitization step remains observable rather than opaque.
 
-`sanitizePrompt(input, options, configs) => { outputMarkdown, diagnostics }`
+## Local development
 
-- `options`:
-  - `enableDictionary` (default `true`)
-  - `enableRedFlags` (default `true`)
-  - `enableMarkdownTransform` (default `true`)
-- `diagnostics`:
-  - `appliedRules: string[]`
-  - `errors: string[]`
+```bash
+npm install
+npm test
+npx serve .
+```
 
-## Test coperti
+Then open the local URL returned by the static server. Serving the files over HTTP avoids browser restrictions that can affect JSON loading from `file://`.
 
-- sostituzioni dizionario case-insensitive
-- rimozione con stringa vuota
-- priorita custom > default
-- red flags regex
-- regex invalida ignorata con warning
-- trasformazione markdown H1/H2/H3
-- input vuoto/null
+## Test coverage
 
-## Deploy
+Current tests cover:
 
-Il workflow `.github/workflows/deploy.yml` esegue:
+- case-insensitive dictionary replacement;
+- removal via empty replacement;
+- custom-over-default precedence;
+- red-flag regex handling;
+- invalid regex warnings;
+- Markdown heading transformation;
+- empty/null input behavior.
 
-1. `npm install`
-2. `npm test`
-3. deploy su GitHub Pages (branch `main`)
+## Project status
 
-Per abilitare Pages:
+**Reference utility / working prototype.**
 
-- Repository Settings -> Pages -> Source: GitHub Actions
+The project is intentionally small and dependency-light. Its value is the explicit sanitization pipeline, configurable policy, diagnostics, and local-first processing model rather than feature breadth.
